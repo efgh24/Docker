@@ -1,0 +1,136 @@
+Docker
+
+* Docker commands
+    * https://docs.docker.com/engine/reference/run/
+    * docker pull
+    * docker run [redis] - starts a new container with a command
+        * Pulls image and starts container
+        * docker pull and start
+        * docker run redis:4.0
+        * docker run -p6000:6379 redis - if port 6370 is occupied this allows use of another port
+
+        *
+    * docker run [-d, -detach] - run container in background and print container id
+    * docker start [containerID] - starts stopped container
+    * docker stop - stops the container
+    * docker ps - lists all running containers
+        * docker ps -a - Show all containers (default shows just running)
+    * docker exec -it - command runs a new command in a running container
+        * docker exec -it [condtainerID] /bin/bash
+        * docker exec -it [name] /bin/bash
+    * docker logs [containerID] - command batch-retrieves logs present at the time of execution
+        * docker logs [name]
+        * docker logs 549ecdc2d024fa7f31c0eec9f0aa32d5ef238805edb6d82cc42ab3c678c5c5f4
+    * docker images - all available images in docker
+    * ctrl c - terminate the container of the image
+    * docker run -d -p6001:6379 —name redis-older redis:4.0
+    * docker run -d -p6000:6379 —name redis-latest redis
+    * docker network ls
+        * docker network create [mongo-network]
+        * docker run -d -p 27017:27017 -d -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=password --name  mongodb --net mongo-network  mongo
+        * docker run -d -p 8081:8081 -e ME_CONFIG_MONGODB_ADMINUSERNAME=admin -e ME_CONFIG_MONGODB_ADMINPASSWORD=password --net mongo-network --name  mongo-express -e ME_CONFIG_MONGODB_SERVER=mongodb mongo-express
+    * docker-compose -f [docker-compose.yaml] up
+        * -f means which file
+        * up - starts all containers
+    * docker build -t my-app:1.0 .
+            * -t - name
+            * . (Dot) means current directory
+        * docker images
+        * docker run my-app
+        * docker rm my-app
+        * docker rmi [respository / image id] my-app
+        * docker build -t my-app:1.0
+        * docker exec it (bin/bash or bin/sh)
+    * exit -
+
+
+
+* Container is a running environment for an image
+    * Application image: postgres, redis, mongo,
+    * Port Bindings: talk to application running inside of container
+    * Virtual file system - own abstraction of file system
+    * Log files
+    * Environmental configs
+* Image
+    * Docker hub contains images
+        * Each image has different versions
+* CONTAINER port vs HOST port
+    * Multiple containers can run on your host machine
+    * Your laptop has only certain port available
+    * Conflict when the same port on host machine
+    * The host forwards the request through a port binding
+* Docker Run vs Docker Compose
+    * Write all the run commands in a structured yaml file
+    * Docker Compose creates a common network
+    * docker-compose -f [docker-compose.yaml] up
+        * -f means which file
+        * up - starts all containers
+    * docker-compose -f [docker-compose.yaml] down
+
+* Docker compose gets all the images and set their arguments
+* Dockerfile Image environment blueprint
+
+docker run -d \
+ --name  mongodb \
+ -p 27017:27017 \
+ -e MONGO_INITDB_ROOT_USERNAME=admin \
+ -e MONGO_INITDB_ROOT_PASSWORD=password \
+--net mongo-network  \
+mongo
+
+docker run -d
+ --name  mongo-express
+ -p 8081:8081 \
+ -e ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+ -e ME_CONFIG_MONGODB_ADMINPASSWORD=password
+ -e ME_CONFIG_MONGODB_SERVER=mongodb
+ --net mongo-network
+mongo-express
+
+DOCKER COMPOSE
+
+version = version of docker-compose
+services = contains all container names
+
+
+mongo-docker-compose.yaml
+version: ‘3’
+services:
+	mongodb:
+		image: mongo
+		ports:
+			-27017:27017
+		environment:
+			-MONGO_INITDB_ROOT_USERNAME=admin
+			-ME_CONFIG_MONGODB_ADMINPASSWORD=password
+	mongo-express:
+		image: mongo-express
+		ports:
+			-8080:8080
+		environment:
+			-ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+			-ME_CONFIG_MONGODB_ADMINPASSWORD=password
+			-ME_CONFIG_MONGODB_SERVER=mongodb
+
+* DOCKER FILE
+    * Blueprint for creating docker images
+        * Image environment blueprint
+    * FROM - start by basing it on another image
+        * FROM node
+        * install node
+    * ENV - optionally define environment variables
+        * MONGO_INITDB_ROOT_USERNAME=admin / ME_CONFIG_MONGODB_ADMINPASSWORD=password
+        * set MONGO_INITDB_ROOT_USERNAME=admin
+        * set ME_CONFIG_MONGODB_ADMINPASSWORD=password
+        * Better to do it in a docker-compose file because if something changes, it can be overwritten by changing the docker-compose file
+    * RUN - execute any linux command, directory is created inside of the container
+        * mkdir -p /home/app
+        * create /home/app folder
+    * COPY - executes on the HOST machine
+        * . /home/app
+            * . means sources, directory is the target
+        * copy current folder files to /home/app
+    * CMD - entry point command; starts the app with a command inside the container where node is pre-installed because of the base image; you can have multiple RUN Commands
+        * [“node”, “server.js”]
+        * start the app with: “node server.js”
+        * FROM node
